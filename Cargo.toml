@@ -1,0 +1,8 @@
+[package]
+name = "hexagon"
+version = "0.1.0"
+edition = "2021"
+publish = false
+authors = [
+    "Stanislav Stoyanov <grimerssy@gmail.com>"
+]
