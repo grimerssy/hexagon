@@ -6,3 +6,22 @@ publish = false
 authors = [
     "Stanislav Stoyanov <grimerssy@gmail.com>"
 ]
+
+[dependencies]
+tokio = { version = "1.29.1", features = ["macros", "rt-multi-thread"] }
+
+anyhow = "1.0.72"
+thiserror = "1.0.44"
+
+async-trait = "0.1.72"
+once_cell = "1.18.0"
+
+config = { version = "0.13.3", default-features = false, features = ["yaml"] }
+strum = "0.25"
+strum_macros = "0.25"
+
+serde = { version = "1.0.181", features = ["derive"] }
+serde_with = "3.1.0"
+serde-aux = { version = "4.2.0", default-features = false }
+
+axum = { version = "0.6.20", features = ["macros"] }
