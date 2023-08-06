@@ -4,11 +4,16 @@ use core::fmt;
 
 use serde::Deserialize;
 
-#[cfg(test)]
-use crate::services::InMemoryDatabase;
 use crate::services::{AnotherDatabase, Database, Service};
 
+#[cfg(test)]
+use {
+    crate::{services::InMemoryDatabase, telemetry},
+    once_cell::sync::Lazy,
+};
+
 pub type App = GenericApp<AnotherDatabase>;
+
 #[cfg(test)]
 type TestingApp = GenericApp<InMemoryDatabase>;
 
@@ -20,6 +25,14 @@ where
     database: DB,
 }
 
+#[derive(Clone, Deserialize)]
+pub struct AppConfig<DB>
+where
+    DB: Database,
+{
+    pub database: DB::Config,
+}
+
 impl<DB> Service for GenericApp<DB>
 where
     DB: Database,
@@ -27,13 +40,21 @@ where
     type Config = AppConfig<DB>;
 
     fn new(config: Self::Config) -> anyhow::Result<Self> {
-        // TODO telemetry
-        // maybe not here, don't want to send anything to jaeger in test mode
         Ok(Self {
             database: DB::new(config.database)?,
         })
     }
 }
+
+#[cfg(test)]
+static TELEMETRY: Lazy<()> = Lazy::new(|| {
+    let level = match std::env::var("LOG_TESTS") {
+        Ok(_) => "debug",
+        Err(_) => "off",
+    };
+    std::env::set_var("RUST_LOG", level);
+    telemetry::init().unwrap();
+});
 
 impl<DB> GenericApp<DB>
 where
@@ -41,16 +62,9 @@ where
 {
     #[cfg(test)]
     pub fn testing() -> TestingApp {
+        Lazy::force(&TELEMETRY);
         TestingApp::new(AppConfig::default()).unwrap()
     }
-}
-
-#[derive(Clone, Deserialize)]
-pub struct AppConfig<DB>
-where
-    DB: Database,
-{
-    pub database: DB::Config,
 }
 
 // Workaround to implement `Debug` and `Default` for config
