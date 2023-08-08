@@ -1,4 +1,6 @@
 mod numbers;
+#[cfg(test)]
+mod testable;
 
 use core::fmt;
 
@@ -6,16 +8,7 @@ use serde::Deserialize;
 
 use crate::services::{AnotherDatabase, Database, Service};
 
-#[cfg(test)]
-use {
-    crate::{services::InMemoryDatabase, telemetry},
-    once_cell::sync::Lazy,
-};
-
 pub type App = GenericApp<AnotherDatabase>;
-
-#[cfg(test)]
-type TestingApp = GenericApp<InMemoryDatabase>;
 
 #[derive(Clone)]
 pub struct GenericApp<DB>
@@ -46,27 +39,6 @@ where
     }
 }
 
-#[cfg(test)]
-static TELEMETRY: Lazy<()> = Lazy::new(|| {
-    let level = match std::env::var("LOG_TESTS") {
-        Ok(_) => "debug",
-        Err(_) => "off",
-    };
-    std::env::set_var("RUST_LOG", level);
-    telemetry::init().unwrap();
-});
-
-impl<DB> GenericApp<DB>
-where
-    DB: Database,
-{
-    #[cfg(test)]
-    pub fn testing() -> TestingApp {
-        Lazy::force(&TELEMETRY);
-        TestingApp::new(AppConfig::default()).unwrap()
-    }
-}
-
 // Workaround to implement `Debug` and `Default` for config
 // #[derive(Debug, Default)] requires all generic parameters to also implement it
 // even if they are not used directly
@@ -81,6 +53,7 @@ where
         }
     }
 }
+
 impl<DB> fmt::Debug for AppConfig<DB>
 where
     DB: Database,
