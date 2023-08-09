@@ -1,6 +1,4 @@
 mod numbers;
-#[cfg(test)]
-mod testable;
 
 use core::fmt;
 
