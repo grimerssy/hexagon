@@ -1,2 +1,5 @@
 [alias]
 debug = "test -F log-tests"
+# shows stdout and stderr from first failed test, omits other outputs
+nxtest = "nextest run -F log-tests"
+nt = "nxtest"

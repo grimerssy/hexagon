@@ -30,24 +30,18 @@
             cargo-edit
             cargo-nextest
             postgresql
-            redis
+            sqlx-cli
           ];
           scripts = {
             setup = ''
               pg_ctl init -o "-U $PGUSER" -o '--auth=trust'
               echo "port = $PGPORT" >> "$PGDATA/postgresql.conf"
-              mkdir -p "$REDIS_DATA"
             '';
             up = ''
               pg_ctl start -l "$PGLOG"
-              redis-server --daemonize yes --dir "$REDIS_DATA" --port "$REDIS_PORT"
             '';
             down = ''
               pg_ctl stop 
-              redis-cli -p "$REDIS_PORT" shutdown
-            '';
-            redis = ''
-              redis-cli -p "$REDIS_PORT"
             '';
           };
           envVarDefaults = {
@@ -56,8 +50,6 @@
             PGLOG = "$PGDATA/logfile";
             PGPORT = "5432";
             PGUSER = "postgres";
-            REDIS_DATA = "$DEVSHELL_DIR/redis";
-            REDIS_PORT = "6379";
           };
         };
         # dependencies

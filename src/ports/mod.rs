@@ -1,8 +1,8 @@
 mod database;
 
-use std::fmt::Debug;
-
 pub use database::*;
+
+use std::fmt::Debug;
 
 use serde::de::DeserializeOwned;
 

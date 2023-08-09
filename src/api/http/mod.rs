@@ -1,15 +1,13 @@
-mod numbers;
+mod error_response;
+mod health_check;
 
 use anyhow::Context;
-use async_trait::async_trait;
 use axum::Router;
 use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
 use serde_with::serde_as;
 
-use crate::{services::Service, App, Config};
-
-use super::Api;
+use crate::App;
 
 #[serde_as]
 #[derive(Clone, Debug, Deserialize)]
@@ -20,25 +18,19 @@ pub struct HttpConfig {
 }
 
 #[derive(Clone, Debug, Deserialize)]
-pub struct ServerConfig {
-    http: HttpConfig,
+pub struct HttpServerConfig {
+    pub http: HttpConfig,
 }
 
 pub struct HttpServer;
 
-#[async_trait]
-impl Api for HttpServer {
-    type Config = ServerConfig;
-
-    async fn run(config: Config<Self, App>) -> anyhow::Result<()> {
-        let app = App::new(config.app)?;
+impl HttpServer {
+    pub async fn run(config: HttpServerConfig, app: App) -> anyhow::Result<()> {
+        let config = config.http;
         let router = Router::new()
-            .nest("/numbers", numbers::router())
+            .nest("/health_check", health_check::router())
             .with_state(app);
-        let addr = std::net::SocketAddr::from((
-            config.api.http.host,
-            config.api.http.port,
-        ));
+        let addr = std::net::SocketAddr::from((config.host, config.port));
         axum::Server::bind(&addr)
             .serve(router.into_make_service())
             .await

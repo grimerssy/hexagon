@@ -1,21 +1,18 @@
-use crate::{
-    app::{AppConfig, GenericApp},
-    services::{Database, InMemoryDatabase, Service},
-};
+use crate::{adapters::InMemoryDatabase, app::App, ports::Database};
 use once_cell::sync::Lazy;
 use tracing::level_filters::LevelFilter;
 
-type TestApp = GenericApp<InMemoryDatabase>;
+type TestApp = App<InMemoryDatabase>;
 
 static TELEMETRY: Lazy<()> = Lazy::new(init_telemetry);
 
-impl<DB> GenericApp<DB>
+impl<DB> App<DB>
 where
     DB: Database,
 {
-    pub fn testable() -> TestApp {
+    pub fn test() -> TestApp {
         Lazy::force(&TELEMETRY);
-        TestApp::new(AppConfig::default()).unwrap()
+        TestApp::new(Default::default()).unwrap()
     }
 }
 

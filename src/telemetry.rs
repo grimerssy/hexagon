@@ -1,3 +1,5 @@
+//TODO opentelemetry
+
 use anyhow::{anyhow, Context};
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{fmt::format::FmtSpan, EnvFilter};
@@ -14,6 +16,7 @@ pub fn init() -> anyhow::Result<()> {
         .map_err(|e| anyhow!("Unable to install global subscriber: {e}"))
 }
 
+#[allow(unused)]
 pub async fn instrument_blocking<F, R>(f: F) -> anyhow::Result<R>
 where
     F: FnOnce() -> R + Send + 'static,
