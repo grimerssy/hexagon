@@ -16,11 +16,11 @@
         };
         scripts = {
           test = ''
-            nix-shell -p cargo --command 'cargo test'
+            nix develop --command cargo test
           '';
           lint = ''
-            nix-shell -p cargo clippy rustfmt --command \
-            'cargo clippy -- -D warnings && cargo fmt --all --check'
+            nix develop --command cargo clippy -- -D warnings && \
+            nix develop --command cargo fmt --all --check
           '';
         };
         # dev shell
