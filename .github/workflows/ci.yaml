@@ -2,37 +2,72 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
     types: [opened, synchronize, reopened]
-    branches:
-      - main
-
-env:
-  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+    branches: [main]
 
 jobs:
-  lint:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Install Nix
-        uses: cachix/install-nix-action@v11
-        with:
-          extra_nix_config: experimental-features = nix-command flakes
-      - name: Run linter
-        run: nix run .#lint
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build library
+        run: cargo build --lib
 
   test:
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Install Nix
-        uses: cachix/install-nix-action@v11
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Runt tests
+        run: cargo test
+
+  clippy:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
         with:
-          extra_nix_config: experimental-features = nix-command flakes
-      - name: Run tests
-        run: nix run .#test
+          components: clippy
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Lint code
+        run: cargo clippy -- -D warnings
+
+  fmt:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Format code
+        run: cargo fmt --all --check
