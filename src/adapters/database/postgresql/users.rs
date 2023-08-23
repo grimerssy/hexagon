@@ -13,13 +13,18 @@ use super::PostgresqlDatabase;
 impl UsersDatabase for PostgresqlDatabase {
     async fn create_user(&mut self, user: NewUser) -> Result<()> {
         match sqlx::query!(
-            r#"
+            "
             insert into users (
-              name, email, password_hash, verification_token, verified, refresh_token
+              name,
+              email,
+              password_hash,
+              verification_token,
+              verified,
+              refresh_token
             )
             values ($1, $2, $3, $4, $5, $6)
             on conflict do nothing;
-            "#,
+            ",
             user.name,
             user.email,
             user.password_hash.expose_secret(),
