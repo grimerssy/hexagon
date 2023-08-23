@@ -1,4 +1,8 @@
-use crate::{adapters::InMemoryDatabase, app::App, ports::Database};
+use crate::{
+    adapters::InMemoryDatabase,
+    app::{App, AppConfig},
+    ports::Database,
+};
 use once_cell::sync::Lazy;
 use tracing::level_filters::LevelFilter;
 
@@ -12,7 +16,8 @@ where
 {
     pub fn test() -> TestApp {
         Lazy::force(&TELEMETRY);
-        TestApp::new(Default::default()).unwrap()
+        let config = AppConfig { database: () };
+        TestApp::new(config).unwrap()
     }
 }
 

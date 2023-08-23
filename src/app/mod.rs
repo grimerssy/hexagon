@@ -31,20 +31,3 @@ where
         })
     }
 }
-
-// Workaround to implement `Default` trait for app config.
-// This is done in such a way so:
-// - generic types do not have to implement `Default` as they are not used directly;
-// - if config types are not `Default`, this implementation will just be skipped.
-impl<DB> Default for AppConfig<DB>
-where
-    DB: Database,
-    DB::Config: Default,
-{
-    #[inline]
-    fn default() -> Self {
-        Self {
-            database: Default::default(),
-        }
-    }
-}
