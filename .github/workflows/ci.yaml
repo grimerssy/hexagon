@@ -8,66 +8,62 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: "password"
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgres://postgres:password@127.0.0.1:5432/postgres
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
-
-      - name: Build library
-        run: cargo build --lib
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@1.72.0
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo install sqlx-cli
+      - run: sqlx migrate run
+      - run: cargo sqlx prepare --check -- --lib
 
   test:
-    needs: [build]
+    needs: check
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_PASSWORD: "password"
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgres://postgres:password@127.0.0.1:5432/postgres
+      SQLX_OFFLINE: true
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
-
-      - name: Run tests
-        run: cargo test
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@1.72.0
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test
 
   clippy:
-    needs: [build]
+    needs: check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@1.72.0
         with:
           components: clippy
-
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
-
-      - name: Lint code
-        run: cargo clippy -- -D warnings
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy -- -D warnings
 
   fmt:
-    needs: [build]
+    needs: check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@1.72.0
         with:
           components: rustfmt
-
-      - name: Format code
-        run: cargo fmt --all --check
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all --check
