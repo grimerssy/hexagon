@@ -10,6 +10,9 @@ authors = [
 [features]
 log-tests = []
 
+[profile.dev.package.sqlx-macros]
+opt-level = 3
+
 [dependencies]
 tokio = { version = "1.30.0", features = ["macros", "rt-multi-thread"] }
 
