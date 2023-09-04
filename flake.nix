@@ -48,7 +48,7 @@
         overlays = [
           (import rust-overlay)
           (self: super: {
-            rust-toolchain = super.rust-bin.stable.latest.default;
+            rust-toolchain = super.rust-bin.stable."1.72.0".default;
           })
         ];
         devShell = mkDevShell pkgs;
