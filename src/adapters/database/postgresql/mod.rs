@@ -1,5 +1,7 @@
 mod users;
 
+use anyhow::Context;
+use async_trait::async_trait;
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
 use sqlx::{
@@ -29,10 +31,12 @@ pub struct PostgresqlDatabaseConfig {
     pub postgresql: PostgresqlConfig,
 }
 
+#[async_trait]
 impl Service for PostgresqlDatabase {
     type Config = PostgresqlDatabaseConfig;
 
-    fn new(config: Self::Config) -> anyhow::Result<Self> {
+    #[tracing::instrument]
+    async fn new(config: Self::Config) -> anyhow::Result<Self> {
         let config = config.postgresql;
         let options = PgConnectOptions::new()
             .host(&config.host)
@@ -45,9 +49,10 @@ impl Service for PostgresqlDatabase {
             } else {
                 PgSslMode::Prefer
             });
-        Ok(Self {
-            pool: Pool::connect_lazy_with(options),
-        })
+        let pool = Pool::connect_with(options)
+            .await
+            .context("Failed to connect to the database")?;
+        Ok(Self { pool })
     }
 }
 

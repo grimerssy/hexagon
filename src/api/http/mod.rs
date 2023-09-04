@@ -25,15 +25,18 @@ pub struct HttpServerConfig {
 pub struct HttpServer;
 
 impl HttpServer {
+    #[tracing::instrument(skip(app))]
     pub async fn run(config: HttpServerConfig, app: App) -> anyhow::Result<()> {
         let config = config.http;
-        let router = Router::new()
-            .nest("/health_check", health_check::router())
-            .with_state(app);
+        let router = router().with_state(app);
         let addr = std::net::SocketAddr::from((config.host, config.port));
         axum::Server::bind(&addr)
             .serve(router.into_make_service())
             .await
             .context("Failed to bind to address")
     }
+}
+
+fn router() -> Router<App> {
+    Router::new().nest("/health_check", health_check::router())
 }

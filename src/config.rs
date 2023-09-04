@@ -11,8 +11,8 @@ static CONFIG: OnceCell<config::Config> = OnceCell::new();
 #[derive(Clone, Copy, Debug, Display, EnumString, EnumVariantNames)]
 #[strum(serialize_all = "lowercase")]
 enum Environment {
-    Development,
-    Production,
+    Local,
+    Deployment,
 }
 
 pub fn init_config<C: DeserializeOwned>() -> anyhow::Result<C> {

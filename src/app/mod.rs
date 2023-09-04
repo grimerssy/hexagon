@@ -12,7 +12,7 @@ where
     database: DB,
 }
 
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct AppConfig<DB>
 where
     DB: Database,
@@ -25,9 +25,10 @@ impl<DB> App<DB>
 where
     DB: Database,
 {
-    pub fn new(config: AppConfig<DB>) -> anyhow::Result<Self> {
+    #[tracing::instrument(skip(config))]
+    pub async fn new(config: AppConfig<DB>) -> anyhow::Result<Self> {
         Ok(Self {
-            database: DB::new(config.database)?,
+            database: DB::new(config.database).await?,
         })
     }
 }

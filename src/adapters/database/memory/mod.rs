@@ -1,22 +1,23 @@
 mod users;
 
+use async_trait::async_trait;
+
 use crate::{
     domain::User,
     ports::{Database, Service},
 };
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct InMemoryDatabase {
     users: Vec<User>,
 }
 
+#[async_trait]
 impl Service for InMemoryDatabase {
     type Config = ();
 
-    fn new(_: Self::Config) -> anyhow::Result<Self> {
-        Ok(Self {
-            users: Default::default(),
-        })
+    async fn new(_: Self::Config) -> anyhow::Result<Self> {
+        Ok(Self::default())
     }
 }
 

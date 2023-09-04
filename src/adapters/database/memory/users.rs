@@ -9,7 +9,7 @@ use super::InMemoryDatabase;
 
 #[async_trait]
 impl UsersDatabase for InMemoryDatabase {
-    #[tracing::instrument(name = "Create user in the database", skip(self))]
+    #[tracing::instrument(skip(self), err(level = "warn", Debug))]
     async fn create_user(&mut self, user: NewUser) -> Result<()> {
         if self.users.iter().any(|u| u.email == user.email) {
             return Err(Error::EmailTaken);

@@ -5,6 +5,7 @@ use crate::{
 };
 use once_cell::sync::Lazy;
 use tracing::level_filters::LevelFilter;
+use tracing_subscriber::fmt::format::FmtSpan;
 
 type TestApp = App<InMemoryDatabase>;
 
@@ -14,10 +15,10 @@ impl<DB> App<DB>
 where
     DB: Database,
 {
-    pub fn test() -> TestApp {
+    pub async fn test() -> TestApp {
         Lazy::force(&TELEMETRY);
         let config = AppConfig { database: () };
-        TestApp::new(config).unwrap()
+        TestApp::new(config).await.unwrap()
     }
 }
 
@@ -29,6 +30,7 @@ fn init_telemetry() {
     };
     tracing_subscriber::fmt()
         .with_max_level(verbosity_level)
+        .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
         .pretty()
         .init()
 }

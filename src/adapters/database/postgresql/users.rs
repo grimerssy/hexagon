@@ -11,6 +11,7 @@ use super::PostgresqlDatabase;
 
 #[async_trait]
 impl UsersDatabase for PostgresqlDatabase {
+    #[tracing::instrument(skip(self), err(level = "warn", Debug))]
     async fn create_user(&mut self, user: NewUser) -> Result<()> {
         match sqlx::query!(
             "
