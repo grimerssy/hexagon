@@ -8,7 +8,7 @@ on:
     branches: main
 
 jobs:
-  check:
+  check_database:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -28,7 +28,6 @@ jobs:
       - run: cargo sqlx prepare --check -- --lib
 
   test:
-    needs: check
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -46,8 +45,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo test
 
-  clippy:
-    needs: check
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -57,8 +55,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo clippy -- -D warnings
 
-  fmt:
-    needs: check
+  format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
