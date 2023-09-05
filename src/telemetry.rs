@@ -26,3 +26,13 @@ where
         .await
         .context("Failed to spawn blocking task")
 }
+
+pub fn warn<E: std::fmt::Debug>(e: E) -> E {
+    tracing::warn!("{e:?}");
+    e
+}
+
+pub fn error<E: std::fmt::Debug>(e: E) -> E {
+    tracing::error!("{e:?}");
+    e
+}

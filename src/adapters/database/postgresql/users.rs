@@ -5,13 +5,14 @@ use secrecy::ExposeSecret;
 use crate::{
     domain::{Error, NewUser, Result},
     ports::UsersDatabase,
+    telemetry,
 };
 
 use super::PostgresqlDatabase;
 
 #[async_trait]
 impl UsersDatabase for PostgresqlDatabase {
-    #[tracing::instrument(skip(self), err(level = "warn", Debug))]
+    #[tracing::instrument(skip(self))]
     async fn create_user(&mut self, user: NewUser) -> Result<()> {
         match sqlx::query!(
             "
@@ -35,10 +36,11 @@ impl UsersDatabase for PostgresqlDatabase {
         )
         .execute(&self.pool)
         .await
-        .context("Failed to insert user")?
+        .context("Failed to insert user")
+        .map_err(telemetry::error)?
         .rows_affected()
         {
-            0 => Err(Error::EmailTaken),
+            0 => Err(Error::EmailTaken).map_err(telemetry::warn),
             1 => Ok(()),
             _ => unreachable!(),
         }
