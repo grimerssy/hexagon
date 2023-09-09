@@ -37,3 +37,6 @@ serde-aux = { version = "4.2.0", default-features = false }
 
 axum = { version = "0.6.20", features = ["macros"] }
 sqlx = { version = "0.7.1", features = ["uuid", "runtime-tokio-rustls", "postgres"] }
+
+[dev-dependencies]
+reqwest = { version = "0.11.20", features = ["rustls-tls"] }
