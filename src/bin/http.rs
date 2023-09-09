@@ -1,8 +1,8 @@
-use hexagon::{init_config, init_telemetry, App, HttpServer};
+use hexagon::{init_config, telemetry, App, HttpServer};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    init_telemetry()?;
+    telemetry::init()?;
     let app_config = init_config()?;
     let http_config = init_config()?;
     let app = App::new(app_config).await?;
