@@ -38,5 +38,7 @@ impl HttpServer {
 }
 
 fn router() -> Router<App> {
-    Router::new().nest("/health_check", health_check::router())
+    let api_router =
+        Router::new().nest("/health_check", health_check::router());
+    Router::new().nest("/api", api_router)
 }
