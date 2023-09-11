@@ -9,6 +9,7 @@ authors = [
 
 [features]
 log-tests = []
+skip-io-tests = []
 
 [profile.dev.package.sqlx-macros]
 opt-level = 3

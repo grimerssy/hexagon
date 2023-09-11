@@ -1,3 +1,5 @@
-mod database;
+mod memory;
+mod postgresql;
 
-pub use database::*;
+pub use memory::InMemoryDatabase;
+pub use postgresql::PostgresqlDatabase;

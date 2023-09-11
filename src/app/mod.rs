@@ -1,5 +1,7 @@
 mod users;
 
+use std::fmt;
+
 use serde::Deserialize;
 
 use crate::ports::Database;
@@ -25,10 +27,22 @@ impl<DB> App<DB>
 where
     DB: Database,
 {
-    #[tracing::instrument(skip(config))]
+    #[tracing::instrument]
     pub async fn new(config: AppConfig<DB>) -> anyhow::Result<Self> {
         Ok(Self {
             database: DB::new(config.database).await?,
         })
+    }
+}
+
+impl<DB> fmt::Debug for AppConfig<DB>
+where
+    DB: Database,
+    DB::Config: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("AppConfig")
+            .field("database", &self.database)
+            .finish()
     }
 }

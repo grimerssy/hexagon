@@ -7,7 +7,7 @@ use tracing_subscriber::{fmt::format::FmtSpan, EnvFilter};
 
 static TELEMETRY: OnceCell<()> = OnceCell::new();
 
-pub fn init() -> anyhow::Result<()> {
+pub fn init_telemetry() -> anyhow::Result<()> {
     TELEMETRY.get_or_try_init(|| {
         let env_filter =
             EnvFilter::try_from_default_env().unwrap_or(EnvFilter::new("INFO"));
@@ -22,7 +22,7 @@ pub fn init() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn init_test() {
+pub fn init_test_telemetry() {
     TELEMETRY.get_or_init(|| {
         let verbosity_level = if cfg!(feature = "log-tests") {
             LevelFilter::DEBUG
@@ -38,7 +38,7 @@ pub fn init_test() {
 }
 
 #[allow(unused)]
-pub async fn instrument_blocking<F, R>(f: F) -> anyhow::Result<R>
+pub(crate) async fn instrument_blocking<F, R>(f: F) -> anyhow::Result<R>
 where
     F: FnOnce() -> R + Send + 'static,
     R: Send + 'static,
@@ -48,12 +48,12 @@ where
         .context("Failed to spawn blocking task")
 }
 
-pub fn warn<E: std::fmt::Debug>(e: E) -> E {
+pub(crate) fn warn<E: std::fmt::Debug>(e: E) -> E {
     tracing::warn!("{e:?}");
     e
 }
 
-pub fn error<E: std::fmt::Debug>(e: E) -> E {
+pub(crate) fn error<E: std::fmt::Debug>(e: E) -> E {
     tracing::error!("{e:?}");
     e
 }

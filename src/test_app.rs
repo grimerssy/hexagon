@@ -2,7 +2,7 @@ use crate::{
     adapters::InMemoryDatabase,
     app::{App, AppConfig},
     ports::Database,
-    telemetry,
+    telemetry::init_test_telemetry,
 };
 
 type TestApp = App<InMemoryDatabase>;
@@ -12,7 +12,7 @@ where
     DB: Database,
 {
     pub async fn test() -> TestApp {
-        telemetry::init_test();
+        init_test_telemetry();
         let config = AppConfig { database: () };
         TestApp::new(config).await.unwrap()
     }

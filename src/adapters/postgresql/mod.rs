@@ -35,7 +35,6 @@ pub struct PostgresqlDatabaseConfig {
 impl Service for PostgresqlDatabase {
     type Config = PostgresqlDatabaseConfig;
 
-    #[tracing::instrument]
     async fn new(config: Self::Config) -> anyhow::Result<Self> {
         let config = config.postgresql;
         let options = PgConnectOptions::new()
