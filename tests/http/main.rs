@@ -17,6 +17,7 @@ struct TestServer {
 impl TestServer {
     async fn start() -> anyhow::Result<Self> {
         init_test_telemetry();
+        std::env::set_var("HTTP__PORT", "0");
         let app_config = init_config()?;
         let http_config = init_config()?;
         let app = App::new(app_config).await?;
