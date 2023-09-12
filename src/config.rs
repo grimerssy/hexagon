@@ -1,12 +1,13 @@
 use std::{path::PathBuf, str::FromStr};
 
 use anyhow::Context;
+use config::Config;
 use once_cell::sync::OnceCell;
 use serde::de::DeserializeOwned;
 use strum::VariantNames;
 use strum_macros::{Display, EnumString, EnumVariantNames};
 
-static CONFIG: OnceCell<config::Config> = OnceCell::new();
+static CONFIG: OnceCell<Config> = OnceCell::new();
 
 #[derive(Clone, Copy, Debug, Display, EnumString, EnumVariantNames)]
 #[strum(serialize_all = "lowercase")]
@@ -23,8 +24,8 @@ pub fn init_config<C: DeserializeOwned>() -> anyhow::Result<C> {
         .context("Failed to deserialize configuration")
 }
 
-fn build_config() -> anyhow::Result<config::Config> {
-    config::Config::builder()
+fn build_config() -> anyhow::Result<Config> {
+    Config::builder()
         .add_source(config::File::from(config_path(environment()?)?))
         .add_source(config::Environment::default().separator("__"))
         .build()
