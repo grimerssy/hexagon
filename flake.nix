@@ -21,7 +21,7 @@
             rust-toolchain
             cargo-edit
             cargo-nextest
-            postgresql
+            mysql
             sqlx-cli
           ];
           buildInputs = [ ];

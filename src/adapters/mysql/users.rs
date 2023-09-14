@@ -8,13 +8,14 @@ use crate::{
     telemetry,
 };
 
-use super::PostgresqlDatabase;
+use super::MySqlDatabase;
 
 #[async_trait]
-impl UsersDatabase for PostgresqlDatabase {
+impl UsersDatabase for MySqlDatabase {
     #[tracing::instrument(skip(self))]
     async fn create_user(&mut self, user: NewUser) -> Result<()> {
         match sqlx::query!(
+            //TODO conflict handling
             "
             insert into users (
               name,
@@ -24,8 +25,7 @@ impl UsersDatabase for PostgresqlDatabase {
               verified,
               refresh_token
             )
-            values ($1, $2, $3, $4, $5, $6)
-            on conflict do nothing;
+            values (?, ?, ?, ?, ?, ?);
             ",
             user.name,
             user.email,

@@ -1,5 +1,5 @@
 mod memory;
-mod postgresql;
+mod mysql;
 
 pub use memory::InMemoryDatabase;
-pub use postgresql::PostgresqlDatabase;
+pub use mysql::MySqlDatabase;

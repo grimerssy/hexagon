@@ -2,7 +2,7 @@ pub mod api;
 pub mod config;
 pub mod telemetry;
 
-pub type App = app::App<adapters::PostgresqlDatabase>;
+pub type App = app::App<adapters::MySqlDatabase>;
 
 mod adapters;
 mod app;
