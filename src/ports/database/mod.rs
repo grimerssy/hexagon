@@ -4,4 +4,4 @@ pub use users::*;
 
 use super::Service;
 
-pub trait Database: Service + UsersDatabase {}
+pub trait Database: Service + UserDatabase {}

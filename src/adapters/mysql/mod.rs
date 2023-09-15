@@ -56,3 +56,10 @@ impl Service for MySqlDatabase {
 }
 
 impl Database for MySqlDatabase {}
+
+fn is_unique_violation(error: &sqlx::Error) -> bool {
+    error
+        .as_database_error()
+        .map(sqlx::error::DatabaseError::kind)
+        .is_some_and(|k| k == sqlx::error::ErrorKind::UniqueViolation)
+}

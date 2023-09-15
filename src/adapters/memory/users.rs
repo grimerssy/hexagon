@@ -2,13 +2,13 @@ use async_trait::async_trait;
 
 use crate::{
     domain::{Error, NewUser, Result, User},
-    ports::UsersDatabase,
+    ports::UserDatabase,
 };
 
 use super::InMemoryDatabase;
 
 #[async_trait]
-impl UsersDatabase for InMemoryDatabase {
+impl UserDatabase for InMemoryDatabase {
     #[tracing::instrument(skip(self), err(level = "warn", Debug))]
     async fn create_user(&mut self, user: NewUser) -> Result<()> {
         if self.users.iter().any(|u| u.email == user.email) {

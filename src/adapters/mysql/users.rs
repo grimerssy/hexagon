@@ -1,18 +1,17 @@
 use anyhow::Context;
 use async_trait::async_trait;
 use secrecy::ExposeSecret;
-use sqlx::error::{DatabaseError, ErrorKind};
 
 use crate::{
     domain::{Error, NewUser, Result},
-    ports::UsersDatabase,
+    ports::UserDatabase,
     telemetry,
 };
 
-use super::MySqlDatabase;
+use super::{is_unique_violation, MySqlDatabase};
 
 #[async_trait]
-impl UsersDatabase for MySqlDatabase {
+impl UserDatabase for MySqlDatabase {
     #[tracing::instrument(skip(self))]
     async fn create_user(&mut self, user: NewUser) -> Result<()> {
         match sqlx::query!(
@@ -38,11 +37,7 @@ impl UsersDatabase for MySqlDatabase {
         .await
         {
             Ok(_) => Ok(()),
-            Err(e)
-                if e.as_database_error()
-                    .map(DatabaseError::kind)
-                    .is_some_and(|k| k == ErrorKind::UniqueViolation) =>
-            {
+            Err(e) if is_unique_violation(&e) => {
                 Err(Error::EmailTaken).map_err(telemetry::warn)
             }
             Err(e) => Err(e)
