@@ -1,40 +1,49 @@
 //TODO opentelemetry
 
-use anyhow::{anyhow, Context};
+use anyhow::Context;
 use once_cell::sync::OnceCell;
-use tracing::level_filters::LevelFilter;
-use tracing_subscriber::{fmt::format::FmtSpan, EnvFilter};
+use tracing::Level;
+use tracing_subscriber::{filter::Targets, fmt::format::FmtSpan, prelude::*};
+
+const CRATE_NAME: &str = env!("CARGO_PKG_NAME");
 
 static TELEMETRY: OnceCell<()> = OnceCell::new();
 
 pub fn init_telemetry() -> anyhow::Result<()> {
     TELEMETRY.get_or_try_init(|| {
-        let env_filter =
-            EnvFilter::try_from_default_env().unwrap_or(EnvFilter::new("INFO"));
-        tracing_subscriber::fmt()
-            .with_max_level(LevelFilter::ERROR)
-            .with_env_filter(env_filter)
+        let format = tracing_subscriber::fmt::layer()
             .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
-            .pretty()
+            .pretty();
+        tracing_subscriber::registry()
+            .with(format)
+            .with(target_filter())
             .try_init()
-            .map_err(|e| anyhow!("Unable to install global subscriber: {e}"))
+            .context("Failed to init tracing subscriber")
     })?;
     Ok(())
 }
 
 pub fn init_test_telemetry() {
     TELEMETRY.get_or_init(|| {
-        let verbosity_level = if cfg!(feature = "log-tests") {
-            LevelFilter::DEBUG
-        } else {
-            LevelFilter::OFF
-        };
-        tracing_subscriber::fmt()
-            .with_max_level(verbosity_level)
+        let format = tracing_subscriber::fmt::layer()
             .with_span_events(FmtSpan::NEW | FmtSpan::CLOSE)
-            .pretty()
+            .pretty();
+        let filter = if cfg!(feature = "log-tests") {
+            target_filter()
+        } else {
+            Targets::default()
+        };
+        tracing_subscriber::registry()
+            .with(format)
+            .with(filter)
             .init()
     });
+}
+
+fn target_filter() -> Targets {
+    Targets::new()
+        .with_default(Level::WARN)
+        .with_target(CRATE_NAME, Level::INFO)
 }
 
 #[allow(unused)]
