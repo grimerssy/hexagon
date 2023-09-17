@@ -10,23 +10,25 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:8
-        ports:
-          - 3306:3306
-        env:
-          MYSQL_ROOT_PASSWORD: root
     env:
       SQLX_VERSION: 0.7.1
       SQLX_FEATURES: rustls mysql
       DATABASE_URL: mysql://root:root@127.0.0.1:3306/mysql
     steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@1.72.0
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Start services
+        run: docker compose up -d
+
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@1.72.0
         with:
           components: clippy
-      - uses: Swatinem/rust-cache@v2
+
+      - name: Cache rust dependencies
+        uses: Swatinem/rust-cache@v2
+
       - name: Cache sqlx-cli
         uses: actions/cache@v2
         id: cache-sqlx
@@ -35,6 +37,7 @@ jobs:
             ~/.cargo/bin/sqlx
             ~/.cargo/bin/cargo-sqlx
           key: ${{ runner.os }}-sqlx-${{ env.SQLX_VERSION }}-${{ env.SQLX_FEATURES }}
+
       - name: Install sqlx-cli
         if: steps.cache-sqlx.outputs.cache-hit == false
         run: >-
@@ -44,36 +47,66 @@ jobs:
           --no-default-features
           --version "${{ env.SQLX_VERSION }}"
           --features "${{ env.SQLX_FEATURES }}"
-      - run: sqlx migrate run
-      - run: cargo sqlx prepare --check -- --lib
-      - run: cargo clippy -- -D warnings
+
+      - name: Run database migrations
+        run: sqlx migrate run
+
+      - name: Check if query metadata is up to date
+        run: cargo sqlx prepare --check -- --lib
+
+      - name: Run linter
+        run: cargo clippy -- -D warnings
+
+      - name: Stop services
+        run: docker compose down
+        if: ${{ always() }}
 
   test:
     runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:8
-        ports:
-          - 3306:3306
-        env:
-          MYSQL_ROOT_PASSWORD: root
     env:
       ENVIRONMENT: local
       SQLX_OFFLINE: true
       DATABASE_URL: mysql://root:root@127.0.0.1:3306/mysql
     steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@1.72.0
-      - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/install-action@cargo-nextest
-      - run: cargo test --no-run
-      - run: cargo nextest run
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Start services
+        run: docker compose up -d
+
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@1.72.0
+        with:
+          components: clippy
+
+      - name: Cache rust dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-nextest
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest
+
+      - name: Compile tests
+        run: cargo test --no-run
+
+      - name: Run tests
+        run: cargo nextest run
+
+      - name: Stop services
+        run: docker compose down
+        if: ${{ always() }}
 
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@1.72.0
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install rust toolchain
+        uses: dtolnay/rust-toolchain@1.72.0
         with:
           components: rustfmt
-      - run: cargo fmt --all --check
+
+      - name: Run formatter
+        run: cargo fmt --all --check
