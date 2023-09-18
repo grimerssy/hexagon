@@ -22,3 +22,32 @@ pub struct User {
     pub verified: bool,
     pub refresh_token: Secret<String>,
 }
+
+#[cfg(test)]
+mod fake {
+    use fake::{
+        faker::{internet::en::SafeEmail, name::en::Name},
+        Dummy, Fake, Faker,
+    };
+    use secrecy::Secret;
+
+    use crate::domain::VerificationToken;
+
+    use super::NewUser;
+
+    impl Dummy<Faker> for NewUser {
+        fn dummy_with_rng<R: fake::Rng + ?Sized>(
+            _: &Faker,
+            rng: &mut R,
+        ) -> Self {
+            Self {
+                name: Name().fake_with_rng(rng),
+                email: SafeEmail().fake_with_rng(rng),
+                password_hash: Secret::new(70.fake_with_rng(rng)),
+                verification_token: Secret::new(VerificationToken::generate()),
+                verified: false,
+                refresh_token: Secret::new(32.fake_with_rng(rng)),
+            }
+        }
+    }
+}

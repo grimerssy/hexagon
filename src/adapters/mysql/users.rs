@@ -51,12 +51,12 @@ impl UserDatabase for MySqlDatabase {
 #[cfg(test)]
 #[cfg(not(feature = "skip-io-tests"))]
 mod tests {
-    use secrecy::Secret;
+    use fake::{Fake, Faker};
     use sqlx::{MySql, Pool};
 
     use crate::{
         adapters::MySqlDatabase,
-        domain::{Error, NewUser, VerificationToken},
+        domain::{Error, NewUser},
         ports::UserDatabase,
         telemetry::init_test_telemetry,
     };
@@ -65,16 +65,17 @@ mod tests {
     async fn reject_duplicate_email(pool: Pool<MySql>) {
         init_test_telemetry();
         let mut db = MySqlDatabase { pool };
+        let email = "example@domain.com";
         let user = NewUser {
-            name: Default::default(),
-            email: "example@domain.com".into(),
-            password_hash: Secret::new(Default::default()),
-            verification_token: Secret::new(VerificationToken::new()),
-            verified: Default::default(),
-            refresh_token: Secret::new(Default::default()),
+            email: email.to_owned(),
+            ..Faker.fake()
         };
         let res = db.create_user(&user).await;
         assert!(res.is_ok());
+        let user = NewUser {
+            email: email.to_owned(),
+            ..Faker.fake()
+        };
         let res = db.create_user(&user).await;
         assert!(res.is_err_and(|e| matches!(e, Error::EmailTaken)));
     }
