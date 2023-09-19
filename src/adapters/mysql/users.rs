@@ -29,7 +29,7 @@ impl UserDatabase for MySqlDatabase {
             user.name,
             user.email,
             user.password_hash.expose_secret(),
-            user.verification_token.expose_secret().to_string(),
+            user.verification_token,
             user.verified,
             user.refresh_token.expose_secret()
         )

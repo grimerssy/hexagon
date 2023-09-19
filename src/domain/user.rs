@@ -7,7 +7,7 @@ pub struct NewUser {
     pub name: String,
     pub email: String,
     pub password_hash: Secret<String>,
-    pub verification_token: Secret<VerificationToken>,
+    pub verification_token: VerificationToken,
     pub verified: bool,
     pub refresh_token: Secret<String>,
 }
@@ -18,7 +18,7 @@ pub struct User {
     pub name: String,
     pub email: String,
     pub password_hash: Secret<String>,
-    pub verification_token: Secret<VerificationToken>,
+    pub verification_token: VerificationToken,
     pub verified: bool,
     pub refresh_token: Secret<String>,
 }
@@ -44,7 +44,7 @@ mod fake {
                 name: Name().fake_with_rng(rng),
                 email: SafeEmail().fake_with_rng(rng),
                 password_hash: Secret::new(70.fake_with_rng(rng)),
-                verification_token: Secret::new(VerificationToken::generate()),
+                verification_token: VerificationToken::generate(),
                 verified: false,
                 refresh_token: Secret::new(32.fake_with_rng(rng)),
             }
