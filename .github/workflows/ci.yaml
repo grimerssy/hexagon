@@ -51,7 +51,7 @@ jobs:
       - name: Run database migrations
         run: sqlx migrate run
 
-      - name: Check if query metadata is up to date
+      - name: Check query metadata
         run: cargo sqlx prepare --check -- --lib
 
       - name: Run linter
