@@ -1,7 +1,5 @@
 mod users;
 
-pub use users::*;
+pub use users::UserDatabase;
 
-use super::Service;
-
-pub trait Database: Service + UserDatabase {}
+pub trait Database: UserDatabase {}

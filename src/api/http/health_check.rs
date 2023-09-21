@@ -1,6 +1,6 @@
 use axum::{http::StatusCode, routing::get, Router};
 
-use crate::App;
+use crate::api::app::App;
 
 pub fn router() -> Router<App> {
     Router::new().route("/", get(health_check))

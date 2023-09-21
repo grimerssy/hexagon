@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 
-use crate::domain::{NewUser, Result};
+use crate::domain::{error::Result, user::NewUser};
 
 #[async_trait]
 pub trait UserDatabase {

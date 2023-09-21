@@ -41,4 +41,5 @@ sqlx = { version = "0.7.1", features = ["uuid", "runtime-tokio-rustls", "mysql"]
 
 [dev-dependencies]
 fake = "2.8.0"
+mockall = "0.11.4"
 reqwest = { version = "0.11.20", features = ["rustls-tls"] }

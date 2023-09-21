@@ -1,3 +1,2 @@
-mod http;
-
-pub use http::HttpServer;
+mod app;
+pub mod http;

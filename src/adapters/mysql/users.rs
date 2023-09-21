@@ -3,8 +3,11 @@ use async_trait::async_trait;
 use secrecy::ExposeSecret;
 
 use crate::{
-    domain::{Error, NewUser, Result},
-    ports::UserDatabase,
+    domain::{
+        error::{Error, Result},
+        user::NewUser,
+    },
+    ports::database::UserDatabase,
     telemetry,
 };
 
@@ -54,12 +57,9 @@ mod tests {
     use fake::{Fake, Faker};
     use sqlx::{MySql, Pool};
 
-    use crate::{
-        adapters::MySqlDatabase,
-        domain::{Error, NewUser},
-        ports::UserDatabase,
-        telemetry::init_test_telemetry,
-    };
+    use crate::telemetry::init_test_telemetry;
+
+    use super::{Error, MySqlDatabase, NewUser, UserDatabase};
 
     #[sqlx::test]
     async fn reject_duplicate_email(pool: Pool<MySql>) {

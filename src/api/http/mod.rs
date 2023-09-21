@@ -9,11 +9,13 @@ use serde::Deserialize;
 use serde_aux::field_attributes::deserialize_number_from_string;
 use serde_with::serde_as;
 
-use crate::App;
+use crate::{api::app::App, config};
+
+use super::app::AppConfig;
 
 #[serde_as]
 #[derive(Clone, Debug, Deserialize)]
-pub struct HttpConfig {
+struct HttpConfig {
     pub host: [u8; 4],
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
@@ -21,7 +23,9 @@ pub struct HttpConfig {
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct HttpServerConfig {
-    pub http: HttpConfig,
+    #[serde(flatten)]
+    app: AppConfig,
+    http: HttpConfig,
 }
 
 pub struct HttpServer {
@@ -30,11 +34,11 @@ pub struct HttpServer {
 }
 
 impl HttpServer {
-    #[tracing::instrument(skip(app))]
-    pub fn new(config: HttpServerConfig, app: App) -> anyhow::Result<Self> {
-        let config = config.http;
+    #[tracing::instrument]
+    pub async fn new(config: HttpServerConfig) -> anyhow::Result<Self> {
+        let app = App::new(config.app).await?;
         let router = router().with_state(app);
-        let addr = SocketAddr::from((config.host, config.port));
+        let addr = SocketAddr::from((config.http.host, config.http.port));
         let listener = TcpListener::bind(addr)?;
         Ok(Self { listener, router })
     }
@@ -58,4 +62,10 @@ fn router() -> Router<App> {
     let api_router =
         Router::new().nest("/health_check", health_check::router());
     Router::new().nest("/api", api_router)
+}
+
+impl HttpServerConfig {
+    pub fn init() -> anyhow::Result<Self> {
+        config::init()
+    }
 }

@@ -1,6 +1,6 @@
 use secrecy::Secret;
 
-use super::VerificationToken;
+use super::verification_token::VerificationToken;
 
 #[derive(Clone, Debug)]
 pub struct NewUser {
@@ -31,9 +31,7 @@ mod fake {
     };
     use secrecy::Secret;
 
-    use crate::domain::VerificationToken;
-
-    use super::NewUser;
+    use super::{NewUser, VerificationToken};
 
     impl Dummy<Faker> for NewUser {
         fn dummy_with_rng<R: fake::Rng + ?Sized>(

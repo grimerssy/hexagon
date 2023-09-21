@@ -1,7 +1,6 @@
 mod users;
 
 use anyhow::Context;
-use async_trait::async_trait;
 use secrecy::{ExposeSecret, Secret};
 use serde::Deserialize;
 use sqlx::{
@@ -9,7 +8,7 @@ use sqlx::{
     MySql, Pool,
 };
 
-use crate::ports::{Database, Service};
+use crate::ports::database::Database;
 
 #[derive(Clone)]
 pub struct MySqlDatabase {
@@ -26,17 +25,8 @@ pub struct MySqlConfig {
     pub require_ssl: bool,
 }
 
-#[derive(Clone, Debug, Deserialize)]
-pub struct MySqlDatabaseConfig {
-    pub mysql: MySqlConfig,
-}
-
-#[async_trait]
-impl Service for MySqlDatabase {
-    type Config = MySqlDatabaseConfig;
-
-    async fn new(config: Self::Config) -> anyhow::Result<Self> {
-        let config = config.mysql;
+impl MySqlDatabase {
+    pub async fn new(config: MySqlConfig) -> anyhow::Result<Self> {
         let options = MySqlConnectOptions::new()
             .host(&config.host)
             .port(config.port)

@@ -16,7 +16,7 @@ enum Environment {
     Deployment,
 }
 
-pub fn init_config<C: DeserializeOwned>() -> anyhow::Result<C> {
+pub fn init<C: DeserializeOwned>() -> anyhow::Result<C> {
     CONFIG
         .get_or_try_init(build_config)?
         .clone()

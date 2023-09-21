@@ -5,7 +5,7 @@ use axum::{
 };
 use serde::Serialize;
 
-use crate::domain::Error;
+use crate::domain::error::Error;
 
 #[derive(Serialize)]
 pub struct ErrorMessage {

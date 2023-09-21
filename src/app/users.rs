@@ -1,6 +1,6 @@
 use crate::{
-    domain::{NewUser, Result},
-    ports::Database,
+    domain::{error::Result, user::NewUser},
+    ports::database::Database,
 };
 
 use super::App;

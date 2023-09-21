@@ -19,6 +19,7 @@ pub struct VerificationToken(Secret<ZeroizableUuid>);
 struct ZeroizableUuid(Uuid);
 
 impl VerificationToken {
+    #[allow(unused)]
     pub fn generate() -> Self {
         Self(Secret::new(ZeroizableUuid(Uuid::new_v4())))
     }
