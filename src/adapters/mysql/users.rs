@@ -1,6 +1,5 @@
 use anyhow::Context;
 use async_trait::async_trait;
-use secrecy::ExposeSecret;
 
 use crate::{
     domain::{
@@ -20,21 +19,19 @@ impl UserDatabase for MySqlDatabase {
         match sqlx::query!(
             "
             insert into users (
-              name,
               email,
               password_hash,
               verification_token,
               verified,
               refresh_token
             )
-            values (?, ?, ?, ?, ?, ?);
+            values (?, ?, ?, ?, ?);
             ",
-            user.name,
             user.email,
-            user.password_hash.expose_secret(),
+            user.password_hash,
             user.verification_token,
             user.verified,
-            user.refresh_token.expose_secret()
+            user.refresh_token
         )
         .execute(&self.pool)
         .await
@@ -65,15 +62,11 @@ mod tests {
     async fn reject_duplicate_email(pool: Pool<MySql>) {
         init_test_telemetry();
         let mut db = MySqlDatabase { pool };
-        let email = "example@domain.com";
-        let user = NewUser {
-            email: email.to_owned(),
-            ..Faker.fake()
-        };
+        let user = Faker.fake();
         let res = db.create_user(&user).await;
         assert!(res.is_ok());
         let user = NewUser {
-            email: email.to_owned(),
+            email: user.email,
             ..Faker.fake()
         };
         let res = db.create_user(&user).await;

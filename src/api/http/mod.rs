@@ -1,3 +1,4 @@
+mod auth;
 mod error_response;
 mod health_check;
 
@@ -59,8 +60,9 @@ impl HttpServer {
 }
 
 fn router() -> Router<App> {
-    let api_router =
-        Router::new().nest("/health_check", health_check::router());
+    let api_router = Router::new()
+        .nest("/auth", auth::router())
+        .nest("/health_check", health_check::router());
     Router::new().nest("/api", api_router)
 }
 

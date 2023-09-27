@@ -7,7 +7,16 @@ pub struct App<DB>
 where
     DB: Database,
 {
-    pub database: DB,
+    database: DB,
+}
+
+impl<DB> App<DB>
+where
+    DB: Database,
+{
+    pub fn with(database: DB) -> Self {
+        Self { database }
+    }
 }
 
 #[cfg(test)]

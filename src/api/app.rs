@@ -12,8 +12,6 @@ pub struct AppConfig {
 impl App {
     #[tracing::instrument]
     pub async fn new(config: AppConfig) -> anyhow::Result<Self> {
-        Ok(Self {
-            database: MySqlDatabase::new(config.mysql).await?,
-        })
+        Ok(Self::with(MySqlDatabase::new(config.mysql).await?))
     }
 }
