@@ -5,4 +5,4 @@ pub mod password;
 pub mod token;
 pub mod user;
 
-mod secret;
+mod sensitive;

@@ -1,8 +1,8 @@
 use uuid::{fmt::Simple, Uuid};
 
-use super::secret::{Secret, Zeroizable};
+use super::sensitive::{Sensitive, Zeroizable};
 
-pub type Token = Secret<Zeroizable<Simple>>;
+pub type Token = Sensitive<Zeroizable<Simple>>;
 
 impl Token {
     pub fn generate() -> Self {

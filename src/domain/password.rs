@@ -1,12 +1,12 @@
-use secrecy::{ExposeSecret, SecretString};
+use secrecy::{ExposeSecret, Secret};
 
 use crate::telemetry;
 
-use super::{error::Error, secret::Secret};
+use super::{error::Error, sensitive::Sensitive};
 
-pub struct Password(SecretString);
+pub struct Password(Secret<String>);
 
-pub type PasswordHash = Secret<String>;
+pub type PasswordHash = Sensitive<String>;
 
 impl ExposeSecret<String> for Password {
     fn expose_secret(&self) -> &String {
@@ -15,10 +15,10 @@ impl ExposeSecret<String> for Password {
 }
 
 //TODO tests
-impl TryFrom<SecretString> for Password {
+impl TryFrom<Secret<String>> for Password {
     type Error = Error;
 
-    fn try_from(value: SecretString) -> Result<Self, Self::Error> {
+    fn try_from(value: Secret<String>) -> Result<Self, Self::Error> {
         validate_password(value.expose_secret().as_str())
             .map(|_| Self(value))
             .map_err(Error::Validation)
@@ -46,7 +46,7 @@ fn validate_password(password: &str) -> Result<(), &'static str> {
 pub struct FakePassword;
 
 #[cfg(test)]
-impl fake::Dummy<FakePassword> for secrecy::SecretString {
+impl fake::Dummy<FakePassword> for secrecy::Secret<String> {
     fn dummy_with_rng<R: fake::Rng + ?Sized>(
         _: &FakePassword,
         _: &mut R,

@@ -9,3 +9,10 @@ mysql:
   password: root
   database: mysql
   require_ssl: false
+
+argon2:
+  secret: ""
+  memory_size: 16
+  iterations: 1
+  parallelism_factor: 1
+  output_length: 32

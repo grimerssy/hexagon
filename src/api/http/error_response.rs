@@ -15,6 +15,7 @@ pub struct ErrorMessage {
 fn status_code(error: &Error) -> StatusCode {
     match error {
         Error::EmailTaken => StatusCode::CONFLICT,
+        Error::InvalidPassword => StatusCode::UNAUTHORIZED,
         Error::Unexpected(_) => StatusCode::INTERNAL_SERVER_ERROR,
         Error::Validation(_) => StatusCode::UNPROCESSABLE_ENTITY,
     }
